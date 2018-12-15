@@ -3,23 +3,36 @@
 Very simple tools for launching a quick EC2 instance without having to go to AWS console
 
 It seems like I am often working on the CLI and need a quick EC2 instance fired up to test something.
-I can never remember the exact command sequence to make using the CLI after than going to the console,
-and setting up terraform for a single instance always seems like too much work. So I have to break my
-flow, log into AWS console, create the instance, copy the public IP and get back to work. 
+I can never remember the exact command sequence to launch an instance via AWS CLI. It also always feels like 
+setting up terraform for a single short loved instance is too much work. So I usually have to break my
+flow, log into AWS console, create the instance, copy the public IP and get back to work.  And since I'm
+easily distracted, I'll probably browse the web a while before I get back to work. :-\
 
 This tool is designed to allow my to crank out an ec2 linux instance in a flash, without leaving the cli. 
 
 This repo includes two versions of the tool.
-cli_instance.sh performs the operations using awscli and bash
-tf_instance.sh performs operations using terraform aws provider. ** This version is always going to be more robust
+* **cli_instance.sh** performs the operations using awscli and bash
+* **tf_instance.sh** performs operations using terraform aws provider. ** This version is always going to be more robust
 
+Note: could also create a Vagrant version I suppose...
+
+Interesting trivia... I thought the terraform version would be much shorter in terms of lines of code.. Turns out it's not. 
+The terraform version currently contains 149 lines, while the cli version contains 146 lines. 
+But, the cli version was harder to write than the terraform version.. The cli version required 5476 characters vs
+3255 for terraform. The cli required much longer, more complex lines of code, which are certainly more likely to
+contain bugs. So use terraform if you can. :-)
+
+		$ cat tf_instance.sh terraform.tf | wc
+				149     407    3255
+		$ cat cli_instance.sh | wc
+				146     562    5476
 
 ## Subcommands:
 * launch:
-	*	Creates an ssh-key names after the local host name (if required)
+	*	Creates an ssh-key in aws using the local ~/.ssh/id_rsa.pub
 	*	Launches a linux t2.micro instance of type ubuntu, aws or aws2
-	*	Stores the instance ids launched in the instances.log file for cli_instance.sh or in terraform state for tf_instance.sh
-	* Provide connection instructions
+	*	cli_instance.sh stores the instance ids launched in the instances.log file
+	* Prints out connection instructions
 
 * list:
 	* list the deployed instances
@@ -30,7 +43,7 @@ tf_instance.sh performs operations using terraform aws provider. ** This version
 
 ## Requirements
 
-* Linux or mac workstation with bash & openssh installed
+* Linux or mac workstation with bash, jq & openssh installed
 * awscli. Required only for cli_instance.sh version. install with `pip install awscli`)
 * terraform. Required only for the tf_instances.sh version. [install instructions](https://learn.hashicorp.com/terraform/getting-started/install.html)
 
@@ -46,7 +59,7 @@ or
 
 ## Example usage
 
-the following commands work the same for cli_instance.sh and tf_instance.sh
+The following commands work the same for cli_instance.sh and tf_instance.sh
 
 Launch an aws linux 2 instance in the current region (defined by AWS_DEFAULT_REGION env var)
 
