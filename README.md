@@ -8,7 +8,7 @@ setting up terraform for a single short loved instance is too much work. So I us
 flow, log into AWS console, create the instance, copy the public IP and get back to work.  And since I'm
 easily distracted, I'll probably browse the web a while before I get back to work. :-\
 
-This tool is designed to allow me to crank out at2.micro ec2 linux instance in a flash, without leaving the cli. 
+This tool is designed to allow me to crank out a t2.micro ec2 linux instance in a flash, without leaving the cli. 
 
 This repo includes two versions of the tool.
 * **cli_instance.sh** performs the operations using awscli and bash
