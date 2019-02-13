@@ -45,4 +45,8 @@ case $1 in
         rm -rf .terraform 
         rm terraform.tfstate*
         ;;
+    * )
+        print_usage
+        exit 1
+        ;;
 esac

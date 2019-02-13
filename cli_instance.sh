@@ -75,15 +75,17 @@ case $1 in
         # Lookup security Group ID with $SG_NAME and in default VPC
         SG_ID=`aws ec2 describe-security-groups \
             --filter Name=group-name,Values=$SG_NAME \
-            --filter Name=vpc-id,Values=$DEFAULT_VPC \
             | jq -r .SecurityGroups[0].GroupId`
         echo "Found Security Group name: $SG_NAME as ID : $SG_ID"
 
         # Add rule to security group
         MY_IP="`curl -s https://ipinfo.io/ip`/32"
-        if [ -n `aws ec2 describe-security-groups \
-            --filter Name=group-name,Values=ssh-only-sg \
-            | jq --arg ip "$MY_IP" '.SecurityGroups[0].IpPermissions[] | select((.FromPort==22) and (.ToPort=22) and (.IpProtocol=="tcp") and (.IpRanges[0].CidrIp==$ip)) | length'` ]; then
+        if [ `aws ec2 describe-security-groups \
+                --filter Name=group-name,Values=ssh-only-sg \
+                | jq --arg ip "$MY_IP" '.SecurityGroups[0].IpPermissions | length'` -eq 0 ] || \
+           [ -n `aws ec2 describe-security-groups \
+                --filter Name=group-name,Values=ssh-only-sg \
+                | jq --arg ip "$MY_IP" '.SecurityGroups[0].IpPermissions[] | select((.FromPort==22) and (.ToPort=22) and (.IpProtocol=="tcp") and (.IpRanges[0].CidrIp==$ip)) | length'` ]; then
             echo "Adding inbound ssh rule from IP $MY_IP to Security Group: $SG_NAME"
             aws ec2 authorize-security-group-ingress \
                 --group-id $SG_ID \
@@ -104,6 +106,9 @@ case $1 in
         # Get the instance ID
         INSTANCE_ID=`echo $INSTANCE | jq -r .Instances[].InstanceId`
         echo $INSTANCE_ID
+        # Tag the instance
+        echo "Tagging instance Name = \"temp_cli_instance\""
+        aws ec2 create-tags --resources $INSTANCE_ID --tags Key=Name,Value=temp_cli_instance
         echo $INSTANCE_ID >> $INSTANCES_LOG
         # Get the public IP
         PUBLIC_IP=`aws ec2 describe-instances \

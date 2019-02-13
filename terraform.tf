@@ -72,6 +72,9 @@ resource "aws_instance" "instance" {
   instance_type   = "${var.size}"
   security_groups = ["${aws_security_group.sec_grp.name}"]
   key_name        = "${aws_key_pair.key.key_name}"
+	tags {
+		Name = "temp_tf_instance"
+	}
 }
 
 resource "aws_key_pair" "key" {
