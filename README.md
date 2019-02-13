@@ -1,14 +1,14 @@
 # aws_instance project
 
-Very simple tools for launching a quick EC2 instance without having to go to AWS console
+The project provides some simple tools for launching a quick EC2 instance without having to go to AWS console
 
 It seems like I am often working on the CLI and need a quick EC2 instance fired up to test something.
 I can never remember the exact command sequence to launch an instance via AWS CLI. It also always feels like 
-setting up terraform for a single short loved instance is too much work. So I usually have to break my
+setting up terraform for a single short lived instance is too much work. So I usually have to break my
 flow, log into AWS console, create the instance, copy the public IP and get back to work.  And since I'm
 easily distracted, I'll probably browse the web a while before I get back to work. :-\
 
-This tool is designed to allow my to crank out an ec2 linux instance in a flash, without leaving the cli. 
+This tool is designed to allow me to crank out a t2.micro ec2 linux instance in a flash, without leaving the cli. 
 
 This repo includes two versions of the tool.
 * **cli_instance.sh** performs the operations using awscli and bash
