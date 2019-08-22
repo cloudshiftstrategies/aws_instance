@@ -11,6 +11,11 @@ variable "region" {
   default     = "us-east-1"
 }
 
+variable "az" {
+  description = "The AZ you want the instance deployed into (if you care)"
+  default = "us-east-1a"
+}
+
 variable "os" {
   description = "The OS to deploy"
   default     = "ubuntu"
@@ -77,6 +82,7 @@ data "aws_vpc" "default" {
 resource "aws_instance" "instance" {
   ami             = "${data.aws_ami.ami.id}"
   instance_type   = "${var.size}"
+  availability_zone = "${var.az}"
   security_groups = ["${aws_security_group.sec_grp.name}"]
   key_name        = "${aws_key_pair.key.key_name}"
 	tags {
