@@ -1,6 +1,11 @@
 # main.tf
 
 # Variables
+variable "profile" {
+  description = "The AWS CLI profile to use (default: default)"
+  default     = "default"
+}
+
 variable "region" {
   description = "The region to deploy resources"
   default     = "us-east-1"
@@ -49,13 +54,14 @@ variable "os_users" {
 
 # Providers
 provider "aws" {
+  profile = "${var.profile}"
   region = "${var.region}"
 }
 
 # Data lookups
 data "aws_ami" "ami" {
   most_recent = true
-  owners = ["self", "aws-marketplace"]
+  owners = ["self","aws-marketplace"]
 
   filter {
     name   = "name"
