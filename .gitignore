@@ -1,3 +1,4 @@
 instances.log
 .terraform*
 terraform.tfstate*
+my.auto.tfvars
