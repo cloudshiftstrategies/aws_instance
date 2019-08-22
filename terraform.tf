@@ -55,6 +55,7 @@ provider "aws" {
 # Data lookups
 data "aws_ami" "ami" {
   most_recent = true
+  owners = ["self", "aws-marketplace"]
 
   filter {
     name   = "name"
