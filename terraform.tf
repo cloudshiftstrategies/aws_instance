@@ -47,6 +47,11 @@ variable "ami_names" {
   }
 }
 
+variable "custom_ami" {
+  description = "A custom AMI to use"
+  default = "YOU MUST SPECIFY IF YOU WANT TO USE THIS"
+}
+
 variable "os_users" {
   type = "map"
 
@@ -55,6 +60,11 @@ variable "os_users" {
     aws    = "ec2-user"
     aws2   = "ec2-user"
   }
+}
+
+variable "custom_user" {
+  description = "The username to use with your custom AMI"
+  default = "YOU MUST SPECIFY IF YOU WANT TO USE THIS"
 }
 
 # Providers
@@ -70,7 +80,7 @@ data "aws_ami" "ami" {
 
   filter {
     name   = "name"
-    values = ["${var.ami_names["${var.os}"]}"]
+    values = ["${lookup(var.ami_names, var.os, var.custom_ami)}"]
   }
 }
 
@@ -116,5 +126,5 @@ output "instance_id" {
   value = "${aws_instance.instance.id}"
 }
 output "ssh_command" {
-  value = "ssh -i ${var.keyfile} ${var.os_users["${var.os}"]}@${aws_instance.instance.public_ip}"
+  value = "ssh -i ${var.keyfile} ${lookup(var.os_users, var.os, var.custom_user)}@${aws_instance.instance.public_ip}"
 }
