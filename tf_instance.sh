@@ -32,7 +32,7 @@ case $1 in
         # Initialize terraform
         terraform init
         # Run the apply
-        terraform apply -var "os=$2" -var "allowed_cidrs=$MY_IP" $REGION_PARM -auto-approve
+        terraform apply -var "os=$2" -var "allowed_cidr=$MY_IP" $REGION_PARM -auto-approve
         ;;
     list )
         # List the output vars
