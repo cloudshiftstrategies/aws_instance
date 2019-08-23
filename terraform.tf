@@ -53,7 +53,7 @@ variable "ami_names" {
 
 variable "custom_ami" {
   description = "A custom AMI to use"
-  default = "YOU MUST SPECIFY IF YOU WANT TO USE THIS"
+  default     = "YOU MUST SPECIFY IF YOU WANT TO USE THIS"
 }
 
 variable "os_users" {
@@ -68,7 +68,7 @@ variable "os_users" {
 
 variable "custom_user" {
   description = "The username to use with your custom AMI"
-  default = "YOU MUST SPECIFY IF YOU WANT TO USE THIS"
+  default     = "YOU MUST SPECIFY IF YOU WANT TO USE THIS"
 }
 
 # Providers
@@ -80,8 +80,8 @@ provider "aws" {
 # Data lookups
 data "aws_ami" "ami" {
   most_recent = true
-	# self for own account, conical for ubuntu, or amazon for aws linux
-  owners      = ["self", "099720109477", "amazon"]
+  # self for own account, conical for ubuntu, or amazon for aws linux
+  owners = ["self", "099720109477", "amazon"]
 
   filter {
     name   = "name"
