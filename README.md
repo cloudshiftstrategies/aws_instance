@@ -80,3 +80,8 @@ Terminate all launched instances
 		$ ./cli_instance.sh terminate
 		Terminating i-0c25a87f27b967980
 		Removing instances log: ./instances.log
+
+Launch an instance with a custom image (only works with Terraform)
+
+		$ ./tf_instance.sh launch -var os="custom" -var custom_ami="alpine-ami-3.10.1" -var custom_user="alpine"
+
