@@ -17,7 +17,15 @@ variable "az" {
 }
 
 locals {
-  azs = { "a" : 0, "b" : 1, "c" : 2, "d" : 3, "e" : 4, "f" : 5, "g" : 6 }
+  azs = {
+    a = 0
+    b = 1
+    c = 2
+    d = 3
+    e = 4
+    f = 5
+    g = 6
+  }
 }
 
 variable "os" {
@@ -42,7 +50,7 @@ variable "allowed_cidr" {
 
 # Maps
 variable "ami_names" {
-  type = "map"
+  type = map(string)
 
   default = {
     ubuntu = "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server*"
@@ -57,7 +65,7 @@ variable "custom_ami" {
 }
 
 variable "os_users" {
-  type = "map"
+  type = map(string)
 
   default = {
     ubuntu = "ubuntu"
@@ -73,19 +81,28 @@ variable "custom_user" {
 
 # Providers
 provider "aws" {
-  profile = "${var.profile}"
-  region  = "${var.region}"
+  profile = var.profile
+  region  = var.region
 }
 
 # Data lookups
 data "aws_ami" "ami" {
   most_recent = true
+
   # self for own account, conical for ubuntu, or amazon for aws linux
   owners = ["self", "099720109477", "amazon"]
 
   filter {
-    name   = "name"
-    values = ["${lookup(var.ami_names, var.os, var.custom_ami)}"]
+    name = "name"
+    # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
+    # force an interpolation expression to be interpreted as a list by wrapping it
+    # in an extra set of list brackets. That form was supported for compatibilty in
+    # v0.11, but is no longer supported in Terraform v0.12.
+    #
+    # If the expression in the following list itself returns a list, remove the
+    # brackets to avoid interpretation as a list of lists. If the expression
+    # returns a single list item then leave it as-is and remove this TODO comment.
+    values = [lookup(var.ami_names, var.os, var.custom_ami)]
   }
 }
 
@@ -94,15 +111,16 @@ data "aws_vpc" "default" {
 }
 
 # All AZs Available in the current region
-data "aws_availability_zones" "available" {}
+data "aws_availability_zones" "available" {
+}
 
 # Resources
 resource "aws_instance" "instance" {
-  ami               = "${data.aws_ami.ami.id}"
-  instance_type     = "${var.size}"
-  availability_zone = "${data.aws_availability_zones.available.names[local.azs[var.az]]}"
-  security_groups   = ["${aws_security_group.sec_grp.name}"]
-  key_name          = "${aws_key_pair.key.key_name}"
+  ami               = data.aws_ami.ami.id
+  instance_type     = var.size
+  availability_zone = data.aws_availability_zones.available.names[local.azs[var.az]]
+  security_groups   = [aws_security_group.sec_grp.name]
+  key_name          = aws_key_pair.key.key_name
   tags = {
     Name = "temp_tf_instance"
   }
@@ -110,26 +128,28 @@ resource "aws_instance" "instance" {
 
 resource "aws_key_pair" "key" {
   key_name   = "ssh-key"
-  public_key = "${file("${var.keyfile}")}"
+  public_key = file(var.keyfile)
 }
 
 resource "aws_security_group" "sec_grp" {
   name_prefix = "ssh-only-sg_"
   description = "ssh_only"
-  vpc_id      = "${data.aws_vpc.default.id}"
+  vpc_id      = data.aws_vpc.default.id
 
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${var.allowed_cidr}"]
+    cidr_blocks = [var.allowed_cidr]
   }
 }
 
 # outputs
 output "instance_id" {
-  value = "${aws_instance.instance.id}"
+  value = aws_instance.instance.id
 }
+
 output "ssh_command" {
   value = "ssh -i ${var.keyfile} ${lookup(var.os_users, var.os, var.custom_user)}@${aws_instance.instance.public_ip}"
 }
+
