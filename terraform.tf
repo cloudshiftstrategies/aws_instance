@@ -13,7 +13,11 @@ variable "region" {
 
 variable "az" {
   description = "The AZ you want the instance deployed into (0, 1, 2, etc)"
-  default = "0"
+  default     = "a"
+}
+
+locals {
+  azs = { "a" : 0, "b" : 1, "c" : 2, "d" : 3, "e" : 4, "f" : 5, "g" : 6 }
 }
 
 variable "os" {
@@ -22,18 +26,18 @@ variable "os" {
 }
 
 variable "size" {
-	description = "The ec2 instance size"
-	default = "t2.micro"
+  description = "The ec2 instance size"
+  default     = "t2.micro"
 }
 
 variable "keyfile" {
-	description = "The local public key file"
-	default = "~/.ssh/id_rsa.pub"
+  description = "The local public key file"
+  default     = "~/.ssh/id_rsa.pub"
 }
 
 variable "allowed_cidr" {
-	description = "The cidr address allowed to access the instance"
-	default = "0.0.0.0/0"
+  description = "The cidr address allowed to access the instance"
+  default     = "0.0.0.0/0"
 }
 
 # Maps
@@ -60,13 +64,14 @@ variable "os_users" {
 # Providers
 provider "aws" {
   profile = "${var.profile}"
-  region = "${var.region}"
+  region  = "${var.region}"
 }
 
 # Data lookups
 data "aws_ami" "ami" {
   most_recent = true
-  owners = ["self","aws-marketplace"]
+	# self for own account, conical for ubuntu, or amazon for aws linux
+  owners      = ["self", "099720109477", "amazon"]
 
   filter {
     name   = "name"
@@ -75,7 +80,7 @@ data "aws_ami" "ami" {
 }
 
 data "aws_vpc" "default" {
-	default = "true"
+  default = "true"
 }
 
 # All AZs Available in the current region
@@ -83,14 +88,14 @@ data "aws_availability_zones" "available" {}
 
 # Resources
 resource "aws_instance" "instance" {
-  ami             = "${data.aws_ami.ami.id}"
-  instance_type   = "${var.size}"
-  availability_zone = "${data.aws_availability_zones.available.names[var.az]}"
-  security_groups = ["${aws_security_group.sec_grp.name}"]
-  key_name        = "${aws_key_pair.key.key_name}"
-	tags {
-		Name = "temp_tf_instance"
-	}
+  ami               = "${data.aws_ami.ami.id}"
+  instance_type     = "${var.size}"
+  availability_zone = "${data.aws_availability_zones.available.names[local.azs[var.az]]}"
+  security_groups   = ["${aws_security_group.sec_grp.name}"]
+  key_name          = "${aws_key_pair.key.key_name}"
+  tags = {
+    Name = "temp_tf_instance"
+  }
 }
 
 resource "aws_key_pair" "key" {

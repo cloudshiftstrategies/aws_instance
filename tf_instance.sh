@@ -16,8 +16,13 @@ LOCAL_KEY=~/.ssh/id_rsa.pub
 #SG_NAME=ssh-only-sg
 
 # Pull the region name from the AWS_DEFAULT_REGION if set (else terrafrom.tf defaults to us-east-1)
-if [ ! -n $AWS_DEFAULT_REGION ]; then
-    $REGION_PARM=" -var \"region=$AWS_DEFAULT_REGION\" "
+if [ ! -z $AWS_DEFAULT_REGION ]; then
+    REGION_PARM=" -var region=$AWS_DEFAULT_REGION "
+fi
+
+# Pull the aws named profile name from the AWS_PROFILE if set (else terrafrom.tf defaults to default)
+if [ ! -z $AWS_PROFILE ]; then
+    PROFILE_PARM=" -var profile=$AWS_PROFILE "
 fi
 
 case $1 in 
@@ -32,7 +37,7 @@ case $1 in
         # Initialize terraform
         terraform init
         # Run the apply
-        terraform apply -var "os=$2" -var "allowed_cidr=$MY_IP" $REGION_PARM -auto-approve
+        terraform apply -var "os=$2" -var "allowed_cidr=$MY_IP" $REGION_PARM $PROFILE_PARM -auto-approve
         ;;
     list )
         # List the output vars
@@ -40,7 +45,7 @@ case $1 in
         ;;
     terminate )
         # Destroy the resources
-        terraform destroy -auto-approve
+        terraform destroy $PROFILE_PARM -auto-approve
         # Clean up the state files
         rm -rf .terraform 
         rm terraform.tfstate*
